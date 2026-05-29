@@ -13,16 +13,6 @@ namespace ClinicaMedicaDeEspecialidades
     { 
         private static readonly List<Paciente> listaPacientes = new();  //Contador para generar el expediente (EXP-1, EXP-2...)
         private static int contadorExpediente = 1; 
-        public static readonly List<string> EspecialidadesValidas = new()
-        {
-            "Medicina General",
-            "Pediatría",
-            "Cardiología",
-            "Dermatología",
-            "Oftalmología",
-            "Ortopedia",
-            "Ginecología"
-        };
         public static void AgregarPaciente(string nombres, string apellidos, int edad, TipoTriage triage, string especialidad)
         {
             Paciente nuevoPaciente = new()

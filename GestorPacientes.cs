@@ -88,7 +88,52 @@ namespace ClinicaMedicaDeEspecialidades
             edades[contadorPacientes] = edad;
             triages[contadorPacientes] = triageSeleccionado;
             especialidades[contadorPacientes] = codigoEspecialidad;
-            medicosAtencion[contadorPacientes] = "No asignado"; 
+            // Asignar médico según la especialidad seleccionada
+            string nombreEspecialidad = MainMenu.EspecialidadesValidas[codigoEspecialidad - 1];
+            string palabraClave = nombreEspecialidad switch//esto es para asignar el medico segun la especialidad que se elija.
+            {//segun la especialidad que se elija, se asigna una palabra clave para buscar al medico que corresponda a esa especialidad.
+                "Medicina General" => "General",
+                "Pediatría" => "Pediatra",
+                "Cardiología" => "Cardióloga",
+                "Dermatología" => "Dermatólogo",
+                "Oftalmología" => "Oftalmólogo",
+                "Ortopedia" => "Ortopedista",
+                "Ginecología" => "Ginecóloga",
+                "Odontología" => "Odontóloga",
+                _ => ""
+            };
+            if(palabraClave != "")//si se encontro una palabra clave valida, se busca el medico que corresponda a esa especialidad y se asigna al paciente.
+            {
+                string medicoAsignado = "";//variable para guardar el nombre del medico asignado al paciente.
+                int menorCarga = int.MaxValue;//variable para guardar la menor carga de pacientes que tenga un medico de esa especialidad.
+                for (int i = 0; i < GestorMedicos.nombresMedicos.Length; i++)//este ciclo busca en la lista de medicos el que corresponda a la especialidad elegida por el paciente.
+                {
+                    if(GestorMedicos.nombresMedicos[i].Contains(palabraClave))//si el nombre del medico contiene la palabra clave de la especialidad, se cuenta la cantidad de pacientes que tiene asignados ese medico.
+                    {
+                        int cargaActual = 0;//variable para contar la cantidad de pacientes asignados a ese medico.
+                        for (int j = 0; j < contadorPacientes; j++)//este ciclo cuenta la cantidad de pacientes que ya tienen asignados a ese medico.
+                        {
+                            if (medicosAtencion[j] == GestorMedicos.nombresMedicos[i])//si el medico asignado a ese paciente es el mismo que el medico que se esta evaluando, se incrementa la carga actual de ese medico.
+                            {
+                            cargaActual++;
+                            }
+                        }
+                        if(cargaActual < menorCarga)//si la carga de ese medico es menor que la menor carga encontrada hasta ahora y el nombre del medico contiene la palabra clave de la especialidad, se asigna ese medico al paciente.
+                        {
+                        menorCarga = cargaActual;//se actualiza la menor carga encontrada hasta ahora.
+                        medicoAsignado = GestorMedicos.nombresMedicos[i];
+                        }
+                    }
+                }
+                if (medicoAsignado != "")
+                {
+                    medicosAtencion[contadorPacientes] = medicoAsignado;
+                }
+                else
+                {
+                    medicosAtencion[contadorPacientes] = "Sin Médico Asignado";
+                }   
+            }
             codigosCitas[contadorPacientes] = $"Pte-{(contadorPacientes + 1):D4}";
             fechasCitas[contadorPacientes] = DateTime.Now.ToString("dd/MM/yyyy");
             estados[contadorPacientes] = 'P'; 

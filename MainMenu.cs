@@ -6,7 +6,7 @@ namespace ClinicaMedicaDeEspecialidades
     {
         public static readonly List<string> EspecialidadesValidas = new List<string>
         {
-            "Medicina General", "Pediatría", "Ginecología", "Cardiología", "Dermatología", "Oftalmología", "Odontología"
+            "Medicina General", "Pediatría", "Ginecología", "Cardiología", "Dermatología", "Oftalmología", "Odontología", "Ortopedia"
         };
         public static int[] formasPago = new int[100];       
         public static int[] calificaciones = new int[100];
@@ -22,7 +22,7 @@ namespace ClinicaMedicaDeEspecialidades
                 Console.WriteLine("    CLINICA MEDICA DE ESPECIALIDADES FIA   ");
                 Console.WriteLine("===========================================");
                 Console.WriteLine("1. Ingresar Nuevo Paciente");
-                Console.WriteLine("2. Ver Pacientes Registrados");
+                Console.WriteLine("2. Ver Reportes");//esta opcion lleva a un submenu de reportes.
                 Console.WriteLine("3. Gestionar Cobros / Cancelar Citas");
                 Console.WriteLine("4. Calificar Atención (Solo Atendidos)"); 
                 Console.WriteLine("5. Buscar Paciente"); 
@@ -33,7 +33,7 @@ namespace ClinicaMedicaDeEspecialidades
                 switch (opcion)
                 {
                     case "1": GestorPacientes.CapturarDatosPaciente(); break;
-                    case "2": MostrarPacientes(); break;
+                    case "2": MostrarReportes(); break;//MostrarReportes es una funcion del main que se encarga de mostrar los reportes de pacientes registrados y promedio de calificaciones por medico.
                     case "3": GestorCobros.ProcesarCobro(); break;
                     case "4": CalificarMedico(); break;
                     case "5": BuscarPaciente(); break;
@@ -49,6 +49,45 @@ namespace ClinicaMedicaDeEspecialidades
                         break;
                 }
             }
+        }
+        public static void MostrarReportes()//esta funcion se encarga de mostrar los reportes
+        {
+            bool volver = false;//esta variable se utiliza para controlar el bucle del menú de reportes, permitiendo al usuario volver al menú principal cuando lo desee.
+            while (!volver)//mientras volver sea false, el menú de reportes seguirá mostrándose, permitiendo al usuario seleccionar diferentes opciones de reporte hasta que decida volver al menú principal.
+            {
+                Console.Clear();//Limpia la consola
+                Console.WriteLine("===================================================");
+                Console.WriteLine("=== Menú de Reportes ===");
+                Console.WriteLine("===================================================");
+                Console.WriteLine("1. Reporte de pacientes registrados");
+                Console.WriteLine("2. Reporte de promedio de calificaciones por médico");
+                Console.WriteLine("3. Reporte de Ingresos");
+                Console.WriteLine("4. Volver al menú principal");
+                Console.WriteLine("===================================================");
+                Console.WriteLine("Seleccione una opción:");
+                string? opcionReporte = Console.ReadLine();//Lee la opción seleccionada por el usuario para mostrar el reporte correspondiente o volver al menú principal.
+                switch (opcionReporte)//Dependiendo de la opción seleccionada, se ejecutará el bloque de código correspondiente para mostrar el reporte deseado o volver al menú principal.
+                {
+                    case "1":
+                        MostrarPacientes();//Llama a la función MostrarPacientes para mostrar el reporte de pacientes registrados.
+                        break;
+                    case "2":
+                        GestorMedicos.NotaPromedioMedicos();//Llama a la función NotaPromedioMedicos de la clase GestorMedicos para mostrar el reporte de promedio de calificaciones por médico.
+                        break;
+                    case "3":
+                        GestorCobros.GananciasPorEspecialidad();//Llama a la función GananciasPorEspecialidad de la clase GestorCobros para mostrar el reporte de ganancias por especialidad.
+                        break;
+                    case "4"://Si el usuario selecciona la opción 4, se establece volver como true, lo que hará que el bucle del menú de reportes termine y el programa regrese al menú principal.
+                        volver = true;
+                        break;
+                    default://Si el usuario ingresa una opción no válida, se muestra un mensaje de error y se espera a que el usuario presione una tecla para reintentar.
+                        Console.WriteLine("\nOpción no válida. Intente nuevamente.");
+                        Console.ReadKey();
+                        break;
+                }
+                            
+            }
+            
         }
         private static void MostrarPacientes()
         {
@@ -118,33 +157,21 @@ namespace ClinicaMedicaDeEspecialidades
             Console.Write("\nIngrese el índice [#] del paciente que desea calificar: ");
             if (int.TryParse(Console.ReadLine(), out int indice) && indice >= 0 && indice < GestorPacientes.contadorPacientes && GestorPacientes.estados[indice] == 'A')
             {
-                Console.WriteLine("\nSeleccione el Médico que lo atendió:");
-                for (int i = 0; i < GestorMedicos.nombresMedicos.Length; i++)
+                string nombreMedico = GestorPacientes.medicosAtencion[indice];//el medico es buscado automaticamente a partir del indice del paciente seleccionado, no se pide al usuario que lo ingrese.
+                Console.WriteLine($"\nCalificando atención del médico: {nombreMedico}");//se muestra el nombre del medico que atendio al paciente seleccionado para calificar.
+                Console.WriteLine("Favor de escribir un numero del 1 al 5 para calificar la atención recibida:");//se pide al usuario que ingrese una calificacion
+                if (int.TryParse(Console.ReadLine(), out int nota) && nota >= 1 && nota <= 5)
                 {
-                    Console.WriteLine($"{i + 1}. {GestorMedicos.nombresMedicos[i]}");
-                }
-                Console.Write("Opción: ");
-                if (int.TryParse(Console.ReadLine(), out int opcMedico) && opcMedico >= 1 && opcMedico <= GestorMedicos.nombresMedicos.Length)
-                {
-                    GestorPacientes.medicosAtencion[indice] = GestorMedicos.nombresMedicos[opcMedico - 1];
-                    Console.Write("\nIngrese la calificación del servicio (Escala del 1 al 5): ");
-                    if (int.TryParse(Console.ReadLine(), out int nota) && nota >= 1 && nota <= 5)
-                    {
-                        calificaciones[indice] = nota;
-                        GestorArchivos.GuardarDatos(); // Guardar en el txt
+                    calificaciones[indice] = nota;//la calificacion se guarda en el arreglo de calificaciones en la posicion del indice del paciente seleccionado.
+                    GestorArchivos.GuardarDatos(); // Guardar en el txt
 
-                        Console.ForegroundColor = ConsoleColor.Green;
-                        Console.WriteLine("\n¡Calificación guardada exitosamente!");
-                        Console.ResetColor();
-                    }
-                    else
-                    {
-                        Console.WriteLine("Calificación inválida. Debe ser un número entre 1 y 5.");
-                    }
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("\n¡Calificación guardada exitosamente!");
+                    Console.ResetColor();
                 }
                 else
                 {
-                    Console.WriteLine("Médico seleccionado no es válido.");
+                    Console.WriteLine("Calificación inválida. Debe ser un número entre 1 y 5.");
                 }
             }
             else
