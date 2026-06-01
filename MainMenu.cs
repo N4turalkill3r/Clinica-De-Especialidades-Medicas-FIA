@@ -59,10 +59,11 @@ namespace ClinicaMedicaDeEspecialidades
                 Console.WriteLine("===================================================");
                 Console.WriteLine("=== Menú de Reportes ===");
                 Console.WriteLine("===================================================");
-                Console.WriteLine("1. Reporte de pacientes registrados");
-                Console.WriteLine("2. Reporte de promedio de calificaciones por médico");
-                Console.WriteLine("3. Reporte de Ingresos");
-                Console.WriteLine("4. Volver al menú principal");
+                Console.WriteLine("1. Reporte General de pacientes registrados");
+                Console.WriteLine("2. Reporte de pacientes por especialidad");
+                Console.WriteLine("3. Reporte de promedio de calificaciones por médico");
+                Console.WriteLine("4. Reporte de Ingresos");
+                Console.WriteLine("5. Volver al menú principal");
                 Console.WriteLine("===================================================");
                 Console.WriteLine("Seleccione una opción:");
                 string? opcionReporte = Console.ReadLine();//Lee la opción seleccionada por el usuario para mostrar el reporte correspondiente o volver al menú principal.
@@ -72,12 +73,15 @@ namespace ClinicaMedicaDeEspecialidades
                         MostrarPacientes();//Llama a la función MostrarPacientes para mostrar el reporte de pacientes registrados.
                         break;
                     case "2":
-                        GestorMedicos.NotaPromedioMedicos();//Llama a la función NotaPromedioMedicos de la clase GestorMedicos para mostrar el reporte de promedio de calificaciones por médico.
+                        PacientesPorEspecialidad();//Llama a la función PacientesPorEspecialidad para mostrar el reporte de pacientes por especialidad.
                         break;
                     case "3":
+                        GestorMedicos.NotaPromedioMedicos();//Llama a la función NotaPromedioMedicos de la clase GestorMedicos para mostrar el reporte de promedio de calificaciones por médico.
+                        break;
+                    case "4":
                         GestorCobros.GananciasPorEspecialidad();//Llama a la función GananciasPorEspecialidad de la clase GestorCobros para mostrar el reporte de ganancias por especialidad.
                         break;
-                    case "4"://Si el usuario selecciona la opción 4, se establece volver como true, lo que hará que el bucle del menú de reportes termine y el programa regrese al menú principal.
+                    case "5"://Si el usuario selecciona la opción 5, se establece volver como true, lo que hará que el bucle del menú de reportes termine y el programa regrese al menú principal.
                         volver = true;
                         break;
                     default://Si el usuario ingresa una opción no válida, se muestra un mensaje de error y se espera a que el usuario presione una tecla para reintentar.
@@ -131,7 +135,7 @@ namespace ClinicaMedicaDeEspecialidades
             }
             Console.WriteLine("============================================================================================================");
             Console.WriteLine($"Total de espacios ocupados: {GestorPacientes.contadorPacientes} de 100.");
-            Console.WriteLine("\nPresione cualquier tecla para regresar al menú.");
+            Console.WriteLine("\nPresione cualquier tecla para regresar al menú de Reportes.");
             Console.ReadKey();
         }
         private static void CalificarMedico()  //esta es una funcion del main para calificar a los docotores de la clinica.
@@ -225,6 +229,39 @@ namespace ClinicaMedicaDeEspecialidades
                 Console.ResetColor();
             }
             Console.WriteLine("\nPresione cualquier tecla para regresar al menú...");
+            Console.ReadKey();
+        }
+        private static void PacientesPorEspecialidad()//esta funcion se encarga de mostrar los pacientes registrados por especialidad.
+        {
+            Console.Clear();
+            if (GestorPacientes.contadorPacientes == 0)//si no hay pacientes registrados, se muestra un mensaje indicando que no hay pacientes en el sistema.
+            {
+                Console.WriteLine("No hay pacientes registrados en este momento.");
+                Console.WriteLine("Presione cualquier tecla para regresar al menú de Reportes...");
+                Console.ReadKey();
+                return;
+            }
+            Console.WriteLine("seleccione la especialidad para mostrar los pacientes registrados:");
+            Console.WriteLine(EspecialidadesValidas.Select((esp, index) => $"{index + 1}. {esp}").Aggregate((a, b) => $"{a}\n{b}"));//se muestra la lista de especialidades válidas con su respectivo número para que el usuario pueda seleccionar la especialidad deseada.
+            Console.WriteLine("Ingrese el número de la especialidad:");
+            if (!int.TryParse(Console.ReadLine(), out int opcionEsp) || opcionEsp < 1 || opcionEsp > EspecialidadesValidas.Count)//se valida que la opción ingresada sea un número válido dentro del rango de especialidades disponibles. Si no es válida, se muestra un mensaje de error y se regresa al menú de reportes.
+            {
+                Console.WriteLine("Opción no válida. Presione cualquier tecla para regresar al menú de Reportes...");
+                Console.ReadKey();
+                return;
+            }
+            string especialidadSeleccionada = EspecialidadesValidas[opcionEsp - 1];//se obtiene el nombre de la especialidad seleccionada a partir del número ingresado por el usuario, restando 1 para ajustar al índice del arreglo de especialidades válidas.
+            Console.WriteLine($"\nPacientes registrados en la especialidad: {especialidadSeleccionada}");//se muestra un encabezado indicando la especialidad seleccionada para mostrar los pacientes registrados en esa especialidad.
+            Console.WriteLine("=======================================================================");
+            for (int i = 0; i < GestorPacientes.contadorPacientes; i++)//se recorre el arreglo de pacientes registrados y se muestra la información de aquellos pacientes cuya especialidad coincida con la especialidad seleccionada por el usuario.
+            {
+                if (GestorPacientes.especialidades[i] == opcionEsp)
+                {
+                    Console.WriteLine($"[{GestorPacientes.codigosCitas[i]}] {GestorPacientes.nombresPacientes[i]} - Triage: {GestorPacientes.triages[i]} - Estado: {GestorPacientes.estados[i]}");
+                }
+            }
+            Console.WriteLine("=======================================================================");
+            Console.WriteLine("Presione cualquier tecla para regresar al menú de Reportes...");
             Console.ReadKey();
         }
     } 
